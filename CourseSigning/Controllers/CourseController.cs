@@ -7,7 +7,8 @@ namespace CourseSigning.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            var model = Repository.Applications;
+            return View(model);
         }
         public IActionResult Apply()
         {
@@ -18,8 +19,16 @@ namespace CourseSigning.Controllers
         [HttpPost]
         public IActionResult Apply([FromForm] Candidate candidate)
         {
-            Repository.Add(candidate);
-            return View("Feedback", candidate);
+            if (Repository.Applications.Any(x => x.EMail.Equals(candidate.EMail)))
+                ModelState.AddModelError("Email", "This email address is already registered.");
+
+            if (ModelState.IsValid)
+            {
+                Repository.Add(candidate);
+                return View("Feedback", candidate);
+            }
+            else
+                return View();
         }
     }
 }
